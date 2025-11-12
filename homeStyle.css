@@ -1,0 +1,32 @@
+body {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.home-container {
+    width: 600px;
+    margin: 100px auto;
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.home-container h2 {
+    color: #333;
+}
+
+.home-container a {
+    display: inline-block;
+    margin-top: 20px;
+    background: #007bff;
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+}
+
+.home-container a:hover {
+    background: #0056b3;
+}

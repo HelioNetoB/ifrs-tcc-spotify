@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artigo Web</title>
+    <link rel="stylesheet" href="indexStyle.css">
+</head>
+<body>
+
+<header>
+    <a href="login.html">Login</a>
+</header>
+
+<div class="sidebar">
+    <button onclick="document.getElementById('intro-banner').scrollIntoView();">Início</button>
+    <button onclick="document.getElementById('sec1').scrollIntoView();">Introdução</button>
+    <button onclick="document.getElementById('sec2').scrollIntoView();">História</button>
+    <button onclick="document.getElementById('sec3').scrollIntoView();">Detalhes</button>
+    <button onclick="document.getElementById('sec4').scrollIntoView();">Conclusão</button>
+</div>
+
+<div class="content">
+
+    <div id="intro-banner">
+        <div class="banner-text">
+            <h1>Bem-vindo a aplicação</h1>
+            <p>Um resumo do que é a aplicação e pra que ela serve</p>
+        </div>
+    </div>
+
+    <section id="sec1">
+        <h2>Introdução</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+    </section>
+    <section id="sec2">
+        <h2>História</h2>
+        <p>Fusce ut nunc eget mauris vulputate feugiat...</p>
+    </section>
+    <section id="sec3">
+        <h2>Detalhes</h2>
+        <p>Integer rhoncus, magna a tincidunt iaculis...</p>
+    </section>
+    <section id="sec4">
+        <h2>Conclusão</h2>
+        <p>Curabitur at velit non erat tincidunt porta...</p>
+    </section>
+
+</div>
+
+</body>
+</html>
