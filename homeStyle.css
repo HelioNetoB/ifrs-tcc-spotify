@@ -204,3 +204,101 @@ body {
     background: #555;
     color: white;
 }
+
+
+
+/* adicional para exceções */
+.exception-instance {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.ex-header {
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+.ex-name {
+    flex:1;
+    padding:6px 8px;
+    border-radius:6px;
+    border:none;
+    background:#222;
+    color:white;
+}
+
+.ex-remove {
+    background:#b33;
+    color:white;
+    border:none;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.ex-search-row {
+    margin-top:8px;
+    position:relative;
+}
+
+.ex-search {
+    width:100%;
+    padding:8px;
+    border-radius:6px;
+    border:none;
+    background:#222;
+    color:white;
+}
+
+.suggestions {
+    position:absolute;
+    left:0;
+    right:0;
+    background:#111;
+    border:1px solid #2a2a2a;
+    max-height:180px;
+    overflow:auto;
+    z-index:5;
+    padding:6px;
+    border-radius:6px;
+}
+
+.suggest-item {
+    padding:8px;
+    border-bottom:1px solid #222;
+    cursor:pointer;
+}
+.suggest-item:hover { background:#222; }
+
+.ex-list {
+    margin-top:8px;
+}
+
+.ex-track {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px;
+    background:#101010;
+    margin-bottom:6px;
+    border-radius:6px;
+}
+
+.ex-track .ex-remove-track {
+    background:#444;
+    border:none;
+    padding:6px 8px;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+    margin-left:8px;
+}
+
+.small { font-size:0.85em; opacity:0.8; }
+
+/* ajustar layout se necessário */
+.tools-area { overflow:auto; max-height:80vh; }
