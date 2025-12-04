@@ -1,116 +1,206 @@
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
     background: #121212;
     color: white;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Caixa inicial para colar playlist */
-.input-box {
-    margin: 40px auto;
+/* NAVBAR */
+.navbar {
+    width: 100%;
+    height: 60px;
+    background: #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px;
+}
+
+.navbar-title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.navbar-user {
+    opacity: 0.8;
+}
+
+/* BOX INICIAL */
+.initial-box {
     width: 60%;
-    background: #1e1e1e;
-    padding: 30px;
+    margin: 70px auto;
+    background: #1c1c1c;
+    padding: 40px;
     border-radius: 15px;
     text-align: center;
 }
 
-.input-box input {
-    width: 60%;
-    padding: 10px;
-    border-radius: 6px;
+.initial-box input {
+    width: 70%;
+    padding: 12px;
+    border-radius: 8px;
     border: none;
-    outline: none;
     margin-right: 10px;
 }
 
-.input-box button {
-    padding: 10px 20px;
-    border: none;
+.initial-box button {
+    padding: 12px 20px;
     background: #1DB954;
-    color: white;
-    border-radius: 6px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
     cursor: pointer;
 }
-
-.layout {
-    display: flex;
-    padding: 20px;
-    gap: 20px;
+.initial-box button:hover {
+    background: #1ed760;
 }
 
-/* Caixa da playlist (ESQUERDA) */
-.playlist-box {
+/* LAYOUT PRINCIPAL */
+.main-layout {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* PLAYLIST AREA */
+.playlist-area {
     flex: 3;
-    background: #1e1e1e;
+    background: #1c1c1c;
     padding: 20px;
     border-radius: 15px;
-    overflow-y: auto;
-    max-height: 85vh;
 }
 
 .playlist-header {
     display: flex;
     gap: 20px;
+    align-items: center;
 }
 
-.playlist-header img {
+.playlist-cover {
+    width: 180px;
     border-radius: 10px;
 }
 
-.track-list {
+.tracks-header {
     margin-top: 20px;
-}
-
-.track-item {
-    display: grid;
-    grid-template-columns: 50px 1fr 1fr 70px;
-    align-items: center;
     padding: 10px 0;
+    display: grid;
+    grid-template-columns: 40px 2fr 2fr 70px;
+    opacity: 0.6;
     border-bottom: 1px solid #333;
 }
 
-.track-item img {
-    border-radius: 4px;
+.track-list {
+    margin-top: 10px;
 }
 
-.track-info {
-    padding-left: 10px;
+.track-item {
+    padding: 10px 0;
+    display: grid;
+    grid-template-columns: 40px 2fr 2fr 70px;
+    align-items: center;
+    border-bottom: 1px solid #222;
+}
+
+/* HOVER */
+.track-item:hover {
+    background: #2a2a2a;
+    cursor: pointer;
+}
+
+.track-number {
+    opacity: 0.6;
+}
+
+.track-title {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.track-cover {
+    width: 45px;
+    border-radius: 3px;
+}
+
+.t-name {
+    font-weight: bold;
+}
+
+.t-artist {
+    opacity: 0.7;
 }
 
 .track-album {
-    font-size: 0.9em;
-    color: #bbbbbb;
+    opacity: 0.8;
 }
 
 .track-duration {
     text-align: right;
-    font-size: 0.9em;
-    color: #aaaaaa;
+    opacity: 0.8;
 }
 
-/* Botão de criar playlist embaralhada */
+/* BOTÃO EMBARALHAR */
 .shuffle-btn {
     width: 100%;
-    margin-top: 20px;
+    margin-top: 25px;
     padding: 15px;
     background: #1DB954;
     border: none;
     border-radius: 10px;
     color: black;
     font-weight: bold;
-    cursor: pointer;
     font-size: 1.1em;
+    cursor: pointer;
 }
 .shuffle-btn:hover {
     background: #1ed760;
 }
 
-/* Caixa lateral (DIREITA) */
-.side-box {
-    flex: 1;
-    background: #1e1e1e;
+/* RIGHT AREA */
+.tools-area {
+    flex: 1.2;
+    background: #1c1c1c;
     padding: 20px;
     border-radius: 15px;
-    height: fit-content;
+}
+
+/* POPUP */
+.popup-overlay {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index: 10;
+}
+
+.popup-box {
+    background: #222;
+    padding: 25px;
+    width: 380px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.popup-box button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.btn-confirm {
+    background: #1DB954;
+    color: black;
+    font-weight: bold;
+}
+
+.btn-cancel {
+    background: #555;
+    color: white;
 }

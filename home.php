@@ -1,19 +1,85 @@
 <?php
 session_start();
 
-// ---------------------------------------------------------------------
-// 1. Verificar autenticação
-// ---------------------------------------------------------------------
-if (!isset($_SESSION['access_token'])) {
-    header("Location: index.php");
+/* -------------------------------------------------------
+   1. Fluxo OAuth — MANTIDO EXATAMENTE COMO NO SEU ORIGINAL
+-------------------------------------------------------- */
+
+if (isset($_SESSION['access_token'])) {
+    // Usuário já está logado
+}
+
+$client_id = "8c475506c0bd401e866407378998ee29";
+$client_secret = "9e04d796a112493bae2c8e25b003e982";
+$redirect_uri = "https://mixtify-mixer-e-editor-de-playlists-e.onrender.com/home.php";
+
+if (isset($_GET['code'])) {
+    $code = $_GET['code'];
+
+    $token_url = "https://accounts.spotify.com/api/token";
+
+    $data = [
+        "grant_type" => "authorization_code",
+        "code" => $code,
+        "redirect_uri" => $redirect_uri,
+        "client_id" => $client_id,
+        "client_secret" => $client_secret
+    ];
+
+    $options = [
+        CURLOPT_URL => $token_url,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query($data),
+        CURLOPT_RETURNTRANSFER => true
+    ];
+
+    $ch = curl_init();
+    curl_setopt_array($ch, $options);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $tokens = json_decode($response, true);
+
+    if (isset($tokens['error'])) {
+        echo "<h2>Erro ao obter token:</h2>";
+        echo "<pre>" . print_r($tokens, true) . "</pre>";
+        exit;
+    }
+
+    $_SESSION['access_token'] = $tokens['access_token'];
+    $_SESSION['refresh_token'] = $tokens['refresh_token'];
+
+    header("Location: home.php");
     exit;
 }
 
-$access_token = $_SESSION['access_token'];
+if (isset($_SESSION['access_token']) && !isset($_GET['code'])) {
 
-// ---------------------------------------------------------------------
-// 2. Função auxiliar para chamadas à Spotify API
-// ---------------------------------------------------------------------
+    $api_url = "https://api.spotify.com/v1/me";
+
+    $headers = [
+        "Authorization: Bearer " . $_SESSION['access_token']
+    ];
+
+    $ch = curl_init($api_url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $user_response = curl_exec($ch);
+    curl_close($ch);
+
+    $user = json_decode($user_response, true);
+
+    if (isset($user["error"])) {
+        echo "<h2>Erro na API:</h2>";
+        echo "<pre>" . print_r($user, true) . "</pre>";
+        exit;
+    }
+}
+
+/* -------------------------------------------------------
+   2. Função auxiliar da API Spotify
+-------------------------------------------------------- */
 function spotifyAPI($endpoint, $access_token, $method = "GET", $body = null) {
     $url = "https://api.spotify.com/v1/" . $endpoint;
 
@@ -26,20 +92,18 @@ function spotifyAPI($endpoint, $access_token, $method = "GET", $body = null) {
 
     if ($method === "POST") {
         curl_setopt($ch, CURLOPT_POST, true);
-        if ($body) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
-        }
+        if ($body) curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
     }
 
     $response = curl_exec($ch);
     curl_close($ch);
-
     return json_decode($response, true);
 }
 
-// ---------------------------------------------------------------------
-// 3. Receber INPUT do usuário (link da playlist)
-// ---------------------------------------------------------------------
+/* -------------------------------------------------------
+   3. Identificar playlist do usuário (se enviada)
+-------------------------------------------------------- */
+
 $playlistData = null;
 $tracks = [];
 
@@ -47,67 +111,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["playlist_url"])) {
 
     $playlist_url = trim($_POST["playlist_url"]);
 
-    // Extrair ID da playlist
-    if (preg_match("/playlist\/([a-zA-Z0-9]+)/", $playlist_url, $matches)) {
-        $playlist_id = $matches[1];
+    if (preg_match("/playlist\/([a-zA-Z0-9]+)/", $playlist_url, $m)) {
 
-        // Buscar playlist
-        $playlistData = spotifyAPI("playlists/$playlist_id", $access_token);
+        $playlist_id = $m[1];
 
-        // Tracks
+        $playlistData = spotifyAPI("playlists/$playlist_id", $_SESSION['access_token']);
         $tracks = $playlistData["tracks"]["items"] ?? [];
     }
 }
 
 ?>
-
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Mixify - Editor de Playlists</title>
+<title>Mixify</title>
 <link rel="stylesheet" href="homeStyle.css">
 
-<style>
-/* TEMPORÁRIO: pop-up estilizado aqui, depois moveremos pro CSS */
-.popup-overlay {
-    position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(5px);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index: 10;
-}
-
-.popup-box {
-    background: #fff;
-    padding: 20px;
-    width: 350px;
-    border-radius: 10px;
-    text-align: center;
-}
-.popup-box button {
-    padding: 10px 20px;
-    margin: 10px;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-
-.btn-confirm { background:#1DB954; color:white; }
-.btn-cancel { background:#ccc; }
-</style>
-
 <script>
-// Mostrar pop-up
 function confirmPopup() {
     document.getElementById("popup").style.display = "flex";
 }
-
-// Fechar pop-up
 function closePopup() {
     document.getElementById("popup").style.display = "none";
 }
@@ -116,83 +140,98 @@ function closePopup() {
 </head>
 <body>
 
+<!-- POPUP -->
 <div id="popup" class="popup-overlay" onclick="closePopup()">
     <div class="popup-box" onclick="event.stopPropagation()">
-        <h3>Confirmar?</h3>
-        <p>Deseja criar uma nova playlist com as músicas embaralhadas?</p>
+        <h3>Criar playlist embaralhada?</h3>
+        <p>Uma nova playlist será criada na sua conta.</p>
 
         <form method="POST" action="shuffle.php">
-            <input type="hidden" name="playlist_id" value="<?php echo $playlistData['id'] ?? ''; ?>">
-            <button class="btn-confirm">Sim, criar</button>
+            <input type="hidden" name="playlist_id" value="<?= $playlistData['id'] ?? '' ?>">
+            <button class="btn-confirm">Confirmar</button>
         </form>
 
         <button class="btn-cancel" onclick="closePopup()">Cancelar</button>
     </div>
 </div>
 
-<h1 style="margin-left: 20px;">Mixify</h1>
+<!-- NAVBAR -->
+<div class="navbar">
+    <div class="navbar-title">Mixify</div>
+    <div class="navbar-user"><?= $user["display_name"] ?></div>
+</div>
 
+<!-- SE NÃO TEM PLAYLIST: INPUT -->
 <?php if (!$playlistData): ?>
-    <!-- ------------------------------------------------------- -->
-    <!-- 1. CAIXA INICIAL PARA ESCOLHER PLAYLIST -->
-    <!-- ------------------------------------------------------- -->
 
-    <div class="input-box">
-        <h2>Insira o link da playlist:</h2>
+<div class="initial-box">
+    <h2>Insira o link da playlist</h2>
 
-        <form method="POST">
-            <input type="text" name="playlist_url" placeholder="https://open.spotify.com/playlist/..." required>
-            <button type="submit">Carregar</button>
-        </form>
-    </div>
+    <form method="POST">
+        <input type="text" name="playlist_url" placeholder="https://open.spotify.com/playlist/..." required>
+        <button type="submit">Carregar</button>
+    </form>
+</div>
 
 <?php else: ?>
 
-<!-- ------------------------------------------------------- -->
-<!-- 2. INTERFACE PRINCIPAL (playlist + colunas laterais) -->
-<!-- ------------------------------------------------------- -->
+<!-- LAYOUT PRINCIPAL -->
+<div class="main-layout">
 
-<div class="layout">
-
-    <!-- DIV DA PLAYLIST (ESQUERDA) -->
-    <div class="playlist-box">
+    <!-- LEFT: PLAYLIST -->
+    <div class="playlist-area">
 
         <div class="playlist-header">
-            <img src="<?php echo $playlistData['images'][0]['url']; ?>" width="180">
+            <img src="<?= $playlistData['images'][0]['url'] ?>" class="playlist-cover">
             <div>
-                <h2><?php echo $playlistData['name']; ?></h2>
-                <p><?php echo $playlistData['description']; ?></p>
-                <p><strong><?php echo count($tracks); ?> músicas</strong></p>
+                <h1><?= $playlistData["name"] ?></h1>
+                <p class="playlist-owner">Criada por <?= $playlistData["owner"]["display_name"] ?></p>
+                <p><?= count($tracks) ?> músicas</p>
             </div>
         </div>
 
-        <hr>
+        <div class="tracks-header">
+            <div class="col1">#</div>
+            <div class="col2">Título</div>
+            <div class="col3">Álbum</div>
+            <div class="col4">Duração</div>
+        </div>
 
         <div class="track-list">
-            <?php foreach ($tracks as $item): 
-                $track = $item['track'];
+            <?php foreach ($tracks as $i => $item): 
+                $track = $item["track"];
             ?>
-                <div class="track-item">
-                    <img src="<?php echo $track['album']['images'][2]['url']; ?>" width="50">
-                    <div class="track-info">
-                        <strong><?php echo $track['name']; ?></strong><br>
-                        <?php echo $track['artists'][0]['name']; ?>
-                    </div>
-                    <div class="track-album"><?php echo $track['album']['name']; ?></div>
-                    <div class="track-duration">
-                        <?php echo floor($track['duration_ms']/60000) . ":" . str_pad(floor(($track['duration_ms']%60000)/1000), 2, "0", STR_PAD_LEFT); ?>
+            <div class="track-item">
+                <div class="track-number"><?= $i+1 ?></div>
+
+                <div class="track-title">
+                    <img src="<?= $track["album"]["images"][2]["url"] ?>" class="track-cover">
+                    <div>
+                        <div class="t-name"><?= $track["name"] ?></div>
+                        <div class="t-artist"><?= $track["artists"][0]["name"] ?></div>
                     </div>
                 </div>
+
+                <div class="track-album"><?= $track["album"]["name"] ?></div>
+
+                <div class="track-duration">
+                    <?php
+                        $ms = $track["duration_ms"];
+                        echo floor($ms/60000) . ":" . str_pad(floor(($ms%60000)/1000), 2, "0");
+                    ?>
+                </div>
+            </div>
             <?php endforeach; ?>
         </div>
 
         <button class="shuffle-btn" onclick="confirmPopup()">Criar playlist embaralhada</button>
+
     </div>
 
-    <!-- DIV DIREITA (FUTURAS FUNÇÕES) -->
-    <div class="side-box">
-        <h2>Ferramentas futuras</h2>
-        <p>Aqui teremos filtros, análises e funcionalidades avançadas.</p>
+    <!-- RIGHT: FUTURA ÁREA -->
+    <div class="tools-area">
+        <h2>Em breve...</h2>
+        <p>Filtros, ordenação, análise musical, BPM, energia, etc.</p>
     </div>
 
 </div>
