@@ -1,32 +1,116 @@
 body {
-    background-color: #f0f0f0;
+    margin: 0;
     font-family: Arial, sans-serif;
+    background: #121212;
+    color: white;
 }
 
-.home-container {
-    width: 600px;
-    margin: 100px auto;
-    background: #fff;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+/* Caixa inicial para colar playlist */
+.input-box {
+    margin: 40px auto;
+    width: 60%;
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 15px;
     text-align: center;
 }
 
-.home-container h2 {
-    color: #333;
-}
-
-.home-container a {
-    display: inline-block;
-    margin-top: 20px;
-    background: #007bff;
-    color: #fff;
-    text-decoration: none;
-    padding: 12px 20px;
+.input-box input {
+    width: 60%;
+    padding: 10px;
     border-radius: 6px;
+    border: none;
+    outline: none;
+    margin-right: 10px;
 }
 
-.home-container a:hover {
-    background: #0056b3;
+.input-box button {
+    padding: 10px 20px;
+    border: none;
+    background: #1DB954;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.layout {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+}
+
+/* Caixa da playlist (ESQUERDA) */
+.playlist-box {
+    flex: 3;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 15px;
+    overflow-y: auto;
+    max-height: 85vh;
+}
+
+.playlist-header {
+    display: flex;
+    gap: 20px;
+}
+
+.playlist-header img {
+    border-radius: 10px;
+}
+
+.track-list {
+    margin-top: 20px;
+}
+
+.track-item {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr 70px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #333;
+}
+
+.track-item img {
+    border-radius: 4px;
+}
+
+.track-info {
+    padding-left: 10px;
+}
+
+.track-album {
+    font-size: 0.9em;
+    color: #bbbbbb;
+}
+
+.track-duration {
+    text-align: right;
+    font-size: 0.9em;
+    color: #aaaaaa;
+}
+
+/* Botão de criar playlist embaralhada */
+.shuffle-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    background: #1DB954;
+    border: none;
+    border-radius: 10px;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1em;
+}
+.shuffle-btn:hover {
+    background: #1ed760;
+}
+
+/* Caixa lateral (DIREITA) */
+.side-box {
+    flex: 1;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 15px;
+    height: fit-content;
 }
