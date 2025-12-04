@@ -1,7 +1,7 @@
 <?php
     // Configurações da Spotify API
-    $client_id = "SEU_CLIENT_ID_AQUI"; 
-    $redirect_uri = "https://SEU-SITE.onrender.com/home.php";
+    $client_id = "8c475506c0bd401e866407378998ee29"; 
+    $redirect_uri = "https://mixtify-mixer-e-editor-de-playlists-e.onrender.com/home.php";
 
     // Scopes – permissões do app
     $scopes = "playlist-read-private playlist-modify-private playlist-modify-public user-library-read";
