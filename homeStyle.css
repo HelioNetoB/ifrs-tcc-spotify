@@ -302,3 +302,27 @@ body {
 
 /* ajustar layout se necessário */
 .tools-area { overflow:auto; max-height:80vh; }
+
+
+.playlist-area {
+    flex: 3;
+    background: #1c1c1c;
+    padding: 20px;
+    border-radius: 15px;
+
+    /* Habilita scroll infinito */
+    height: calc(100vh - 120px);
+    overflow-y: scroll;
+}
+
+/* Scrollbar estilo Spotify */
+.playlist-area::-webkit-scrollbar {
+    width: 10px;
+}
+.playlist-area::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 5px;
+}
+.playlist-area::-webkit-scrollbar-track {
+    background: #1c1c1c;
+}

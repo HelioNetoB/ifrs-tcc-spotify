@@ -201,33 +201,34 @@ foreach ($tracks as $idx => $item) {
             <div class="col4">Duração</div>
         </div>
 
-        <div class="track-list">
-            <?php foreach ($tracks as $i => $item):
-                $track = $item["track"];
-                $artists = array_map(function($a){return $a['name'];}, $track['artists']);
-            ?>
-            <div class="track-item" data-uri="<?= htmlspecialchars($track['uri']) ?>">
-                <div class="track-number"><?= $i+1 ?></div>
+        <div id="trackList" class="track-list">
+        <?php foreach ($tracks as $i => $item): 
+            $track = $item["track"];
+            $artists = array_map(fn($a) => $a["name"], $track["artists"]);
+        ?>
+        <div class="track-item" data-uri="<?= htmlspecialchars($track["uri"]) ?>">
+            <div class="track-number"><?= $i + 1 ?></div>
 
-                <div class="track-title">
-                    <img src="<?= htmlspecialchars($track["album"]["images"][2]["url"] ?? '') ?>" class="track-cover" alt="">
-                    <div>
-                        <div class="t-name"><?= htmlspecialchars($track["name"]) ?></div>
-                        <div class="t-artist"><?= htmlspecialchars(implode(", ", $artists)) ?></div>
-                    </div>
-                </div>
-
-                <div class="track-album"><?= htmlspecialchars($track["album"]["name"]) ?></div>
-
-                <div class="track-duration">
-                    <?php
-                        $ms = $track["duration_ms"];
-                        echo floor($ms/60000) . ":" . str_pad(floor(($ms%60000)/1000), 2, "0");
-                    ?>
+            <div class="track-title">
+                <img src="<?= htmlspecialchars($track["album"]["images"][2]["url"] ?? '') ?>" class="track-cover">
+                <div>
+                    <div class="t-name"><?= htmlspecialchars($track["name"]) ?></div>
+                    <div class="t-artist"><?= htmlspecialchars(implode(", ", $artists)) ?></div>
                 </div>
             </div>
-            <?php endforeach; ?>
-        </div>
+
+            <div class="track-album"><?= htmlspecialchars($track["album"]["name"]) ?></div>
+
+            <div class="track-duration">
+                <?php
+                    $ms = $track["duration_ms"];
+                    echo floor($ms/60000) . ":" . str_pad(floor(($ms%60000)/1000), 2, "0");
+                ?>
+            </div>
+    </div>
+    <?php endforeach; ?>
+</div>
+
     </div>
 
     <!-- RIGHT: FERRAMENTAS / EXCEÇÕES -->
@@ -262,8 +263,14 @@ foreach ($tracks as $idx => $item) {
 
 <!-- ================= JS ================= -->
 <script>
+const PLAYLIST_ID = "<?= $playlistData['id'] ?>";
+let offset = 100;
+let loadingMore = false;
+let allTracks = <?= json_encode($tracks_for_js) ?>;
+
+
 /* Tracks disponibilizadas pelo PHP */
-const playlistTracks = <?= json_encode($tracks_for_js, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
+let playlistTracks = allTracks;
 
 /* Estado local das exceções */
 let exceptions = []; // array de {id, name, uris: [uri,...], uiElement}
@@ -275,6 +282,60 @@ let trackToException = {};
 /* Funções UI */
 const exceptionsRoot = document.getElementById('exceptionsRoot');
 const addExceptionBtn = document.getElementById('addExceptionBtn');
+
+const trackListDiv = document.getElementById("trackList");
+
+trackListDiv.addEventListener("scroll", () => {
+    const scrollTop = trackListDiv.scrollTop;
+    const scrollHeight = trackListDiv.scrollHeight;
+    const clientHeight = trackListDiv.clientHeight;
+
+    // Load next batch when near bottom (80%)
+    if (!loadingMore && scrollTop + clientHeight >= scrollHeight * 0.8) {
+        loadMoreTracks();
+    }
+});
+
+function loadMoreTracks() {
+    loadingMore = true;
+
+    fetch(`load_tracks.php?playlist_id=${PLAYLIST_ID}&offset=${offset}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.tracks || data.tracks.length === 0) return;
+
+            data.tracks.forEach((t, i) => {
+                allTracks.push(t);
+
+                const index = offset + i + 1;
+
+                const div = document.createElement("div");
+                div.className = "track-item";
+                div.dataset.uri = t.uri;
+                div.innerHTML = `
+                    <div class="track-number">${index}</div>
+                    <div class="track-title">
+                        <img class="track-cover" src="${t.album_img}">
+                        <div>
+                            <div class="t-name">${t.name}</div>
+                            <div class="t-artist">${t.artists.join(", ")}</div>
+                        </div>
+                    </div>
+                    <div class="track-album">${t.album}</div>
+                    <div class="track-duration">${formatMs(t.duration_ms)}</div>
+                `;
+                trackListDiv.appendChild(div);
+            });
+
+            offset += 100;
+            loadingMore = false;
+        });
+}
+
+function formatMs(ms) {
+    return Math.floor(ms/60000) + ":" + String(Math.floor((ms%60000)/1000)).padStart(2, "0");
+}
+
 
 addExceptionBtn.addEventListener('click', () => {
     createExceptionInstance();
